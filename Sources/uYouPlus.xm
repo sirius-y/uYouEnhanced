@@ -570,6 +570,16 @@ static NSString *accessGroupID() {
 }
 %end
 
+// Hide double tap to seek overlay - @arichornlover
+%hook YTInlinePlayerDoubleTapIndicatorView
+- (CGFloat)circleRadius {
+    if (IS_ENABLED(@"hideDoubleTapToSeekOverlay_enabled")) {
+        return 0;
+    }
+    return %orig;
+}
+%end
+
 // Video Controls Overlay Options
 // Hide CC / Hide Autoplay switch / Hide YTMusic Button / Enable Share Button / Enable Save to Playlist Button
 %hook YTMainAppControlsOverlayView
@@ -629,17 +639,19 @@ static NSString *accessGroupID() {
 
 // Hide Fullscreen Button - @arichornlover
 %hook YTInlinePlayerBarContainerView
-- (void)setFullscreenButtonDisabled:(BOOL)fullscreenButtonDisabled {
-    %orig;
+- (void)layoutSubviews {
+    %orig; 
     if (IS_ENABLED(@"disableFullscreenButton_enabled")) {
-        if (self.exitFullscreenButton && self.enterFullscreenButton) {
+        if (self.exitFullscreenButton) {
             [self.exitFullscreenButton removeFromSuperview];
-            [self.enterFullscreenButton removeFromSuperview];
             self.exitFullscreenButton.frame = CGRectZero;
+        }
+        if (self.enterFullscreenButton) {
+            [self.enterFullscreenButton removeFromSuperview];
             self.enterFullscreenButton.frame = CGRectZero;
         }
+        self.fullscreenButtonDisabled = YES;
     }
-    self.fullscreenButtonDisabled = YES;
 }
 %end
 
